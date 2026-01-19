@@ -1,11 +1,18 @@
 import { useRecoilState } from "recoil";
-import { taskListState } from "../atom";
+import { list } from "../atom";
 import { useState } from "react";
-import type { Task } from "../models";
+import type { Task, TaskGroup } from "../models";
 
-export default function TaskInput() {
-    const [tasks, setTasks] = useRecoilState(taskListState);
+
+type Props = {
+    index: number
+}
+
+
+export default function TaskInput({ index }: Props) {
     const [task, setTask] = useState<string>("");
+    const [listOfTasks, setListOfTasks] = useRecoilState<TaskGroup[]>(list);
+    let tasks = [...listOfTasks[index].tasks];
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -18,26 +25,28 @@ export default function TaskInput() {
             editing: false,
             selected: false,
         };
-        setTasks([...tasks, newTask]);
+        tasks = [newTask, ...tasks];
+        let newTaskGroup = { ...listOfTasks[index], tasks: tasks };
+        let listOfTasksCopy = [...listOfTasks];
+        listOfTasksCopy[index] = newTaskGroup;
+        setListOfTasks([...listOfTasksCopy]);
         setTask("");
     };
 
     return (
-        <div className="mb-3 row">
-            <div className="col-sm-10">
-                <form className="d-flex" role="search" onSubmit={handleSubmit}>
-                    <input
-                        type="text"
-                        className="form-control me-2 rounded-5"
-                        value={task}
-                        onChange={(e) => setTask(e.target.value)}
-                        placeholder="Enter task here"
-                    />
-                    <button type="submit" className="btn btn-primary">
-                        Submit
-                    </button>
-                </form>
-            </div>
+        <div className="mb-3 row w-100">
+            <form className="d-flex" role="search" onSubmit={handleSubmit}>
+                <input
+                    type="text"
+                    className="form-control me-2 text-black bg-white"
+                    value={task}
+                    onChange={(e) => setTask(e.target.value)}
+                    placeholder="Enter task here"
+                />
+                <button type="submit" className="btn btn-primary rounded-pill">
+                    Submit
+                </button>
+            </form>
         </div>
     );
 }

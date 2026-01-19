@@ -1,5 +1,5 @@
 import { atom } from "recoil";
-import type { Task } from "./models";
+import type { Task, TaskGroup } from "./models";
 
 
 export const taskListState = atom<Task[]>({
@@ -7,7 +7,7 @@ export const taskListState = atom<Task[]>({
     default: [],
 });
 
-export const selectedTasks = atom<number>({
-    key: 'selectedTasks',
-    default: 0,
+export const list = atom<TaskGroup[]>({
+    key: 'list',
+    default: [],
 });

@@ -1,0 +1,34 @@
+.wrapper {
+    height: calc(100vh - 56px); /* Account for navbar */
+    border-right: 1px solid #dee2e6;
+    width: 200px;
+    flex-shrink: 0; /* Don't shrink the sidebar */
+    overflow: hidden;
+    transition: width 0.3s ease;
+}
+
+.wrapper.collapsed {
+    width: 0;
+    padding: 0 !important;
+    border-right: none;
+}
+
+.sidebar {
+  width: 200px;
+  transition: transform 0.3s ease;
+}
+
+.sidebar.collapsed {
+  transform: translateX(-100%);
+}
+
+/* Main content */
+.content {
+  flex-grow: 1;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.content.expanded {
+  width: 100%;
+}

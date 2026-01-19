@@ -15,12 +15,12 @@ export default function TaskList() {
         if (!task.completed) {
             for (let i = index; i < tasksCopy.length; i++) {
                 if (i + 1 < tasksCopy.length && tasksCopy[i + 1].completed) {
-                    tasksCopy[i] = { ...task, completed: !task.completed };
+                    tasksCopy[i] = { ...task, completed: !task.completed, selected: false };
                     break;
                 } else if (i + 1 < tasksCopy.length) {
                     tasksCopy[i] = tasksCopy[i + 1];
                 } else if (i + 1 === tasksCopy.length) {
-                    tasksCopy[i] = { ...task, completed: !task.completed };
+                    tasksCopy[i] = { ...task, completed: !task.completed, selected: false };
                 }
             }
             setCompletedCnt(completedCnt + 1);
@@ -37,11 +37,6 @@ export default function TaskList() {
                 }
             }
         }
-        // console.log("After Toggle:");
-
-        // for (let i = 0; i <= tasksCopy.length - 1; i++) {
-        //     console.log(tasksCopy[i]);
-        // }
         setTasks(tasksCopy);
     };
 
@@ -80,7 +75,7 @@ export default function TaskList() {
     const handleGlobalToggle = () => {
         let tasksCopy = [...tasks];
         let status = false;
-        for(let i = 0; i < tasksCopy.length; i++) {
+        for (let i = 0; i < tasksCopy.length; i++) {
             if (tasksCopy[i].selected && tasksCopy[i].completed === status) {
                 status = !status;
                 break;
@@ -89,7 +84,7 @@ export default function TaskList() {
         for (let i = 0; i < tasksCopy.length; i++) {
             if (tasksCopy[i].selected) {
                 tasksCopy[i] = { ...tasksCopy[i], completed: status };
-                if(status) {
+                if (status) {
                     setCompletedCnt(completedCnt + 1);
                 } else {
                     setCompletedCnt(completedCnt - 1);
@@ -97,9 +92,20 @@ export default function TaskList() {
                 tasksCopy[i] = { ...tasksCopy[i], selected: false };
             }
         }
+
+        let completedTasks = [], incompleteTasks = [];
+        for (let i = 0; i < tasksCopy.length; i++) {
+            if (tasksCopy[i].completed) {
+                completedTasks.push(tasksCopy[i]);
+            } else {
+                incompleteTasks.push(tasksCopy[i]);
+            }
+        }
+        const sortedTasks = [...incompleteTasks, ...completedTasks];
+        // console.log("After Toggle:", sortedTasks);
         setSelectedCnt(0);
         setSelectGlobal(false);
-        setTasks(tasksCopy);
+        setTasks(sortedTasks);
     };
 
     const handleSelectAll = () => {
@@ -112,75 +118,77 @@ export default function TaskList() {
 
     return (
         <div className="border rounded overflow-hidden container">
-            <table className="table table-hover">
-                <thead>
-                    <tr>
-                        <th scope="col" className="text-center" style={{ width: "1%" }}>
-                            <input type="checkbox" onChange={handleSelectAll} checked={selectGlobal} />
-                        </th>
-                        <th scope="col">Name</th>
-                        <th scope="col" className="text-center" style={{ width: "1%" }}>
-                            <button
-                                className={
-                                    "btn btn-danger btn-sm" +
-                                    (selectedCnt === 0 ? " disabled" : "")
-                                }
-                                onClick={handleGlobalRemove}
-                            >
-                                <i className="bi bi-trash"></i>
-                            </button>
-                        </th>
-                        <th scope="col" className="text-center" style={{ width: "1%" }}>
-                            <button
-                                className={
-                                    "btn btn-primary btn-sm" +
-                                    (selectedCnt === 0 ? " disabled" : "")
-                                }
-                                onClick={handleGlobalToggle}
-                            >
-                                <i className="bi bi-check"></i>
-                            </button>
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {tasks.map((task, index) => (
-                        <tr key={task.id}>
-                            <td className="text-center" style={{ width: "1%" }}>
-                                <input
-                                    type="checkbox"
-                                    checked={task.selected}
-                                    onChange={() => handleSelect(task)}
-                                />
-                            </td>
-                            <td
-                                className={task.completed ? "text-decoration-line-through" : ""}
-                            >
-                                {task.name}
-                            </td>
-                            <td>
-                                <button
-                                    className="btn btn-danger btn-sm"
-                                    onClick={() => handleRemove(task)}
-                                >
-                                    <i className="bi bi-trash"></i>{" "}
-                                </button>
-                            </td>
-                            <td>
+            {/* <div className="table-responsive"> */}
+                <table className="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col" className="text-center" style={{ width: "1%" }}>
+                                <input type="checkbox" onChange={handleSelectAll} checked={selectGlobal} />
+                            </th>
+                            <th scope="col">Name</th>
+                            <th scope="col" className="text-center" style={{ width: "1%" }}>
                                 <button
                                     className={
-                                        "btn btn-sm " +
-                                        (task.completed ? "btn-success" : "btn-outline-primary")
+                                        "btn btn-danger btn-sm" +
+                                        (selectedCnt === 0 ? " disabled" : "")
                                     }
-                                    onClick={() => handleToggle(task, index)}
+                                    onClick={handleGlobalRemove}
                                 >
-                                    <i className="bi bi-check"></i>{" "}
+                                    <i className="bi bi-trash"></i>
                                 </button>
-                            </td>
+                            </th>
+                            <th scope="col" className="text-center" style={{ width: "1%" }}>
+                                <button
+                                    className={
+                                        "btn btn-primary btn-sm" +
+                                        (selectedCnt === 0 ? " disabled" : "")
+                                    }
+                                    onClick={handleGlobalToggle}
+                                >
+                                    <i className="bi bi-check"></i>
+                                </button>
+                            </th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
+                    </thead>
+                    <tbody>
+                        {tasks.map((task, index) => (
+                            <tr key={task.id}>
+                                <td className="text-center" style={{ width: "1%" }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={task.selected}
+                                        onChange={() => handleSelect(task)}
+                                    />
+                                </td>
+                                <td
+                                    className={task.completed ? "text-decoration-line-through" : ""}
+                                >
+                                    {task.name}
+                                </td>
+                                <td>
+                                    <button
+                                        className="btn btn-danger btn-sm"
+                                        onClick={() => handleRemove(task)}
+                                    >
+                                        <i className="bi bi-trash"></i>{" "}
+                                    </button>
+                                </td>
+                                <td>
+                                    <button
+                                        className={
+                                            "btn btn-sm " +
+                                            (task.completed ? "btn-success" : "btn-outline-primary")
+                                        }
+                                        onClick={() => handleToggle(task, index)}
+                                    >
+                                        <i className="bi bi-check"></i>{" "}
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        // </div>
     );
 }

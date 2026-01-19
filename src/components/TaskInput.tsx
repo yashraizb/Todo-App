@@ -33,7 +33,7 @@ export default function TaskInput() {
                         onChange={(e) => setTask(e.target.value)}
                         placeholder="Enter task here"
                     />
-                    <button type="button" className="btn btn-primary">
+                    <button type="submit" className="btn btn-primary">
                         Submit
                     </button>
                 </form>

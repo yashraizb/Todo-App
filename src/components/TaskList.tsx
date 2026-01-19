@@ -112,7 +112,6 @@ export default function TaskList() {
 
     return (
         <div className="border rounded overflow-hidden container">
-            {selectedCnt}
             <table className="table table-hover">
                 <thead>
                     <tr>

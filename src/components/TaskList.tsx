@@ -27,12 +27,12 @@ export default function TaskList() {
                 }
             }
             setCompletedCnt(completedCnt + 1);
-            if(completedCnt + 1 === tasks.length) {
+            if(selectedCnt + 1 === tasks.length) {
                 setSelectGlobal(true);
             }
         } else {
             setCompletedCnt(completedCnt - 1);
-            if(completedCnt - 1 < tasks.length) {
+            if(selectedCnt - 1 < tasks.length) {
                 setSelectGlobal(false);
             }
             for (let i = index; i >= 0; i--) {
@@ -129,12 +129,12 @@ export default function TaskList() {
     }
 
     return (
-        <div className="border rounded overflow-hidden container">
+        <div className="border rounded overflow-hidden container shadow">
             {/* selectedCnt: {selectedCnt}<br/>
             completedCnt: {completedCnt}<br/>
             selectGlobal: {selectGlobal.toString()}<br/> */}
             {/* <div className="table-responsive"> */}
-                <table className="table table-hover mb-0">
+                <table className="table table-hover ">
                     <thead>
                         <tr>
                             <th scope="col" className="text-center" style={{ width: "1%" }}>

@@ -1,18 +1,28 @@
-import { useRecoilState } from "recoil";
-import { selectedTasks, taskListState } from "../atom";
-import { useEffect, useReducer, useState } from "react";
-import type { Task, TaskAction } from "../models";
+import { useRecoilState, type SetterOrUpdater } from "recoil";
+import { useEffect, useState } from "react";
+import type { Task, TaskGroup } from "../models";
+import TaskInput from "./TaskInput";
 
-export default function TaskList() {
-    const [tasks, setTasks] = useRecoilState<Task[]>(taskListState);
-    const [selectedCnt, setSelectedCnt] = useRecoilState<number>(selectedTasks);
+
+type Props = {
+    taskGroup: TaskGroup[];
+    index: number;
+    setTasks: SetterOrUpdater<TaskGroup[]>;
+};
+
+
+export default function TaskList({ taskGroup, index, setTasks }: Props) {
+    // const [tasks, setTasks] = useRecoilState<Task[]>(taskListState);
+    let tasks = [...taskGroup[index!].tasks];
+    let taskGroupCopy = [...taskGroup];
+    const [selectedCnt, setSelectedCnt] = useState<number>(0);
     const [selectGlobal, setSelectGlobal] = useState<boolean>(false);
     const [completedCnt, setCompletedCnt] = useState<number>(0);
 
     const handleToggle = (task: Task, index: number) => {
-        const tasksCopy = [...tasks];
+        let tasksCopy = [...tasks];
         if (!task.completed) {
-            if(task.selected) {
+            if (task.selected) {
                 setSelectedCnt(selectedCnt - 1);
             }
             for (let i = index; i < tasksCopy.length; i++) {
@@ -39,11 +49,16 @@ export default function TaskList() {
                 }
             }
         }
-        setTasks(tasksCopy);
+        taskGroupCopy[index!] = {...taskGroupCopy[index!], tasks: tasksCopy};
+        setTasks([...taskGroupCopy]);
     };
 
     const handleRemove = (task: Task) => {
-        setTasks(tasks.filter((t) => t.id !== task.id));
+        // setTasks(tasks.filter((t) => t.id !== task.id));
+        let tasksCopy = tasks.filter((t) => t.id !== task.id);
+        taskGroupCopy[index!] = {...taskGroupCopy[index!], tasks: tasksCopy};
+        setTasks([...taskGroupCopy]);
+        setSelectedCnt(selectedCnt - 1);
     };
 
     const handleSelect = (task: Task) => {
@@ -52,19 +67,21 @@ export default function TaskList() {
         } else {
             setSelectedCnt(selectedCnt + 1);
         }
-        const tasksCopy = tasks.map((t) => {
+        let tasksCopy = tasks.map((t) => {
             if (t.id === task.id) {
                 return { ...t, selected: !t.selected };
             }
             return t;
         });
-        setTasks(tasksCopy);
+        taskGroupCopy[index!] = {...taskGroupCopy[index!], tasks: tasksCopy};
+        setTasks([...taskGroupCopy]);
     };
 
     const handleGlobalRemove = () => {
-        const tasksCopy = tasks.filter((t) => !t.selected);
-        setTasks(tasksCopy);
+        let tasksCopy = tasks.filter((t) => !t.selected);
+        taskGroupCopy[index!] = {...taskGroupCopy[index!], tasks: tasksCopy};
         setSelectedCnt(0);
+        setTasks([...taskGroupCopy]);
     };
 
     const handleGlobalToggle = () => {
@@ -101,18 +118,20 @@ export default function TaskList() {
         }
         const sortedTasks = [...incompleteTasks, ...completedTasks];
         setSelectedCnt(0);
-        setTasks(sortedTasks);
+        taskGroupCopy[index!] = {...taskGroupCopy[index!], tasks: sortedTasks};
+        setTasks([...taskGroupCopy]);
     };
 
     const handleSelectAll = () => {
         const allSelected = selectedCnt === tasks.length;
-        const tasksCopy = tasks.map((t) => ({ ...t, selected: !allSelected }));
-        setTasks(tasksCopy);
+        let tasksCopy = tasks.map((t) => ({ ...t, selected: !allSelected }));
+        taskGroupCopy[index!] = { ...taskGroupCopy[index!], tasks: tasksCopy };
+        setTasks([...taskGroupCopy]);
         setSelectedCnt(allSelected ? 0 : tasks.length);
     }
 
     useEffect(() => {
-        if(selectedCnt === tasks.length && tasks.length > 0) {
+        if (selectedCnt === tasks.length && tasks.length > 0) {
             setSelectGlobal(true);
         } else {
             setSelectGlobal(false);
@@ -120,14 +139,15 @@ export default function TaskList() {
     }, [selectedCnt]);
 
     return (
-        <div className="border rounded overflow-hidden container shadow w-100">
-            {/* selectedCnt: {selectedCnt}<br/>
-            completedCnt: {completedCnt}<br/>
-            selectGlobal: {selectGlobal.toString()}<br/> */}
-            {/* <div className="table-responsive"> */}
-                <table className="table table-hover ">
+        <div className="overflow-hidden" key={"tg-" + index.toString()}>
+            <TaskInput index={index} />
+            <div className="table-responsive overflow-y-auto" style={{
+                maxHeight: "250px",
+                minHeight: "auto"
+            }}>
+                <table className="table table-hover table-dark">
                     <thead>
-                        <tr>
+                        <tr className="table-dark">
                             <th scope="col" className="text-center" style={{ width: "1%" }}>
                                 <input type="checkbox" onChange={handleSelectAll} checked={selectGlobal} />
                             </th>
@@ -158,8 +178,8 @@ export default function TaskList() {
                     </thead>
                     <tbody>
                         {tasks.map((task, index) => (
-                            <tr key={task.id}>
-                                <td className="text-center" style={{ width: "1%" }}>
+                            <tr className="table-dark" key={task.id}>
+                                <td className="text-center table-dark" style={{ width: "1%" }}>
                                     <input
                                         type="checkbox"
                                         checked={task.selected}
@@ -195,6 +215,6 @@ export default function TaskList() {
                     </tbody>
                 </table>
             </div>
-        // </div>
+        </div>
     );
 }

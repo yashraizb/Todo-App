@@ -13,6 +13,9 @@ export default function TaskList() {
         const tasksCopy = [...tasks];
         console.log("Before Toggle:", task);
         if (!task.completed) {
+            if(task.selected) {
+                setSelectedCnt(selectedCnt - 1);
+            }
             for (let i = index; i < tasksCopy.length; i++) {
                 if (i + 1 < tasksCopy.length && tasksCopy[i + 1].completed) {
                     tasksCopy[i] = { ...task, completed: !task.completed, selected: false };
@@ -24,8 +27,14 @@ export default function TaskList() {
                 }
             }
             setCompletedCnt(completedCnt + 1);
+            if(completedCnt + 1 === tasks.length) {
+                setSelectGlobal(true);
+            }
         } else {
             setCompletedCnt(completedCnt - 1);
+            if(completedCnt - 1 < tasks.length) {
+                setSelectGlobal(false);
+            }
             for (let i = index; i >= 0; i--) {
                 if (i - 1 >= 0 && !tasksCopy[i - 1].completed) {
                     tasksCopy[i] = { ...task, completed: !task.completed };
@@ -81,17 +90,20 @@ export default function TaskList() {
                 break;
             }
         }
+        let completed = 0;
         for (let i = 0; i < tasksCopy.length; i++) {
             if (tasksCopy[i].selected) {
                 tasksCopy[i] = { ...tasksCopy[i], completed: status };
                 if (status) {
-                    setCompletedCnt(completedCnt + 1);
+                    completed += 1;
                 } else {
-                    setCompletedCnt(completedCnt - 1);
+                    completed -= 1;
                 }
                 tasksCopy[i] = { ...tasksCopy[i], selected: false };
             }
         }
+
+        setCompletedCnt(completed);
 
         let completedTasks = [], incompleteTasks = [];
         for (let i = 0; i < tasksCopy.length; i++) {
@@ -118,6 +130,9 @@ export default function TaskList() {
 
     return (
         <div className="border rounded overflow-hidden container">
+            {/* selectedCnt: {selectedCnt}<br/>
+            completedCnt: {completedCnt}<br/>
+            selectGlobal: {selectGlobal.toString()}<br/> */}
             {/* <div className="table-responsive"> */}
                 <table className="table table-hover mb-0">
                     <thead>
@@ -177,7 +192,7 @@ export default function TaskList() {
                                     <button
                                         className={
                                             "btn btn-sm " +
-                                            (task.completed ? "btn-success" : "btn-outline-primary")
+                                            (task.completed ? "btn-success" : "btn-primary")
                                         }
                                         onClick={() => handleToggle(task, index)}
                                     >

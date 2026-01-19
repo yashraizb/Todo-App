@@ -1,6 +1,6 @@
 import { useRecoilState } from "recoil";
 import { selectedTasks, taskListState } from "../atom";
-import { useReducer, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import type { Task, TaskAction } from "../models";
 
 export default function TaskList() {
@@ -11,7 +11,6 @@ export default function TaskList() {
 
     const handleToggle = (task: Task, index: number) => {
         const tasksCopy = [...tasks];
-        console.log("Before Toggle:", task);
         if (!task.completed) {
             if(task.selected) {
                 setSelectedCnt(selectedCnt - 1);
@@ -27,14 +26,8 @@ export default function TaskList() {
                 }
             }
             setCompletedCnt(completedCnt + 1);
-            if(selectedCnt + 1 === tasks.length) {
-                setSelectGlobal(true);
-            }
         } else {
             setCompletedCnt(completedCnt - 1);
-            if(selectedCnt - 1 < tasks.length) {
-                setSelectGlobal(false);
-            }
             for (let i = index; i >= 0; i--) {
                 if (i - 1 >= 0 && !tasksCopy[i - 1].completed) {
                     tasksCopy[i] = { ...task, completed: !task.completed };
@@ -56,14 +49,8 @@ export default function TaskList() {
     const handleSelect = (task: Task) => {
         if (task.selected && selectedCnt) {
             setSelectedCnt(selectedCnt - 1);
-            if (selectedCnt === tasks.length) {
-                setSelectGlobal(false);
-            }
         } else {
             setSelectedCnt(selectedCnt + 1);
-            if (selectedCnt === tasks.length - 1) {
-                setSelectGlobal(true);
-            }
         }
         const tasksCopy = tasks.map((t) => {
             if (t.id === task.id) {
@@ -78,7 +65,6 @@ export default function TaskList() {
         const tasksCopy = tasks.filter((t) => !t.selected);
         setTasks(tasksCopy);
         setSelectedCnt(0);
-        setSelectGlobal(false);
     };
 
     const handleGlobalToggle = () => {
@@ -114,9 +100,7 @@ export default function TaskList() {
             }
         }
         const sortedTasks = [...incompleteTasks, ...completedTasks];
-        // console.log("After Toggle:", sortedTasks);
         setSelectedCnt(0);
-        setSelectGlobal(false);
         setTasks(sortedTasks);
     };
 
@@ -125,11 +109,18 @@ export default function TaskList() {
         const tasksCopy = tasks.map((t) => ({ ...t, selected: !allSelected }));
         setTasks(tasksCopy);
         setSelectedCnt(allSelected ? 0 : tasks.length);
-        setSelectGlobal(!allSelected);
     }
 
+    useEffect(() => {
+        if(selectedCnt === tasks.length && tasks.length > 0) {
+            setSelectGlobal(true);
+        } else {
+            setSelectGlobal(false);
+        }
+    }, [selectedCnt]);
+
     return (
-        <div className="border rounded overflow-hidden container shadow">
+        <div className="border rounded overflow-hidden container shadow w-100">
             {/* selectedCnt: {selectedCnt}<br/>
             completedCnt: {completedCnt}<br/>
             selectGlobal: {selectGlobal.toString()}<br/> */}

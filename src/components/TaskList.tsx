@@ -1,4 +1,4 @@
-import { useRecoilState, type SetterOrUpdater } from "recoil";
+import { type SetterOrUpdater } from "recoil";
 import { useEffect, useState } from "react";
 import type { Task, TaskGroup } from "../models";
 import TaskInput from "./TaskInput";
@@ -40,12 +40,12 @@ export default function TaskList({ taskGroup, index, setTasks }: Props) {
             setCompletedCnt(completedCnt - 1);
             for (let i = index; i >= 0; i--) {
                 if (i - 1 >= 0 && !tasksCopy[i - 1].completed) {
-                    tasksCopy[i] = { ...task, completed: !task.completed };
+                    tasksCopy[i] = { ...task, completed: !task.completed, selected: false};
                     break;
                 } else if (i - 1 >= 0) {
                     tasksCopy[i] = tasksCopy[i - 1];
                 } else if (i - 1 < 0) {
-                    tasksCopy[i] = { ...task, completed: !task.completed };
+                    tasksCopy[i] = { ...task, completed: !task.completed, selected: false };
                 }
             }
         }
